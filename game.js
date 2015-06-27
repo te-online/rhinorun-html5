@@ -67,42 +67,25 @@ window.onload = function() {
         game.load.image('canyon', 'assets/backgrounds/schlucht.jpg');
 
         // Animations
-        // this.loadFrameAnimation(game, 'assets/rhino__walking/rhino__walking_', 0, 29, 5, '.png', 'rhino__walking_');
         game.load.atlasXML('rhino__walking', 'assets/rhino__walking/rhino__walking.png', 'assets/rhino__walking/rhino__walking.xml');
-        // game.load.image('rhino__walking', 'assets/rhino__walking/Rhino walking_00000.png');
     }
 
     Gameworld.prototype.create = function() {
         background = game.add.image(0, 0, 'canyon');
 
         this.animationObjects.rhino = game.add.sprite(window.innerWidth/2, 0, 'rhino__walking');
+        // Position the animation
         this.animationObjects.rhino.y = window.innerHeight - (this.animationObjects.rhino.width/2);
+        // Mirror this animation
         this.animationObjects.rhino.anchor.setTo(.5, .5);
         this.animationObjects.rhino.scale.x *= -1;
+        // Add a looped animation called walk
         this.animationObjects.rhino.animations.add('walk', null, 30, true);
         this.animationObjects.rhino.animations.play('walk');
 
-        console.log(this.animationObjects.rhino);
-
-        this.nextAnimation = this.animationObjects.rhino.walk;
-
+        // Set the timeline for the whole game
         this.timeline.push( { 'sprite': this.animationObjects.rhino, 'animation': 'walk' } );
         this.timeline.push( [ { 'sprite': this.animationObjects.rhino, 'animation': 'walk' }, { 'sprite': this.animationObjects.rhino, 'animation': 'walk' } ]);
-    }
-
-    Gameworld.prototype.loadFrameAnimation = function(gameobj, filename, start, stop, zeroPad, ending, slug) {
-        for(var i = start; i < stop; i++) {
-            var num = this.getWithZeros(i, zeroPad);
-            gameobj.load.image(slug+num, filename+num+ending);
-            console.log(filename+num+ending);
-        }
-    }
-
-    Gameworld.prototype.getWithZeros = function(number, numZeros) {
-        while(String(number).length < numZeros) {
-            number = String(0)+String(number);
-        }
-        return number;
     }
 
     Gameworld.prototype.over = function() {
