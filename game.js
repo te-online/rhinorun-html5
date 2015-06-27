@@ -34,10 +34,32 @@ window.onload = function() {
 
     function Gameworld() {
         this.gameOver = false;
+
         this.currentDecision = 0;
+
         this.animationObjects = {};
+
         this.frameNum = 0;
         this.speed = 2;
+
+        this.isInteractive = true;
+        this.nextAnimation = null;
+
+        this.changePoints = [ 
+            {   'pixels': 395, 
+                'decision': true
+            },
+            {   'pixels': 408, 
+                'decision': true
+            },
+            {   'pixels': 795, 
+                'decision': false
+            }, 
+        ];
+        this.currentChangePoint = 0;
+
+        this.timeline = [];
+        this.cursor = 0;
     }
 
     Gameworld.prototype.preload = function() {
@@ -59,6 +81,13 @@ window.onload = function() {
         this.animationObjects.rhino.scale.x *= -1;
         this.animationObjects.rhino.animations.add('walk', null, 30, true);
         this.animationObjects.rhino.animations.play('walk');
+
+        console.log(this.animationObjects.rhino);
+
+        this.nextAnimation = this.animationObjects.rhino.walk;
+
+        this.timeline.push( { 'sprite': this.animationObjects.rhino, 'animation': 'walk' } );
+        this.timeline.push( [ { 'sprite': this.animationObjects.rhino, 'animation': 'walk' }, { 'sprite': this.animationObjects.rhino, 'animation': 'walk' } ]);
     }
 
     Gameworld.prototype.loadFrameAnimation = function(gameobj, filename, start, stop, zeroPad, ending, slug) {
@@ -91,6 +120,50 @@ window.onload = function() {
             background.x -= 1;
         }
         this.frameNum++;
+
+        // Wenn eine Interaktion durch den User möglich ist
+        //      Wenn Geld eingeworfen wurde
+        //          Setze Entscheidung
+        //              wurde münze a eingeworfen setze entscheidung auf 1
+        //              wurde münze b eingeworfen setze entscheidung auf 2
+        //          Setze nächste Animation nach entscheidung
+        //          Interaktion durch den User ist nicht mehr möglich
+        // 
+        // Wenn ein changePoint erreicht wurde
+        //      Wenn Entscheidung erforderlich und Entscheidung == 0
+        //          leite Game Over ein
+        //      sonst
+        //          spiele nächste Animation
+        //          
+        //       
+        // Wann ist eine Interaktion möglich?
+        // Was ist die nächste Animation, wenn keine Interaktion möglich ist?
+        //    
+        if(this.isInteractive) {
+            if(this.coinmachine.hasCoin()) {
+                for(var i = 0; i < coins.length; i++) {
+                    if(this.coinmachine.whatCoin() == this.coins[i]) {
+                        this.decision = i+1;
+                    }
+                } 
+                this.cursor++;
+                this.nextAnimation = this.timeline[this.cursor][this.decision-1];
+                this.isInteractive = false;
+            }
+        }
+
+        if((background.x * -1) == this.changePoints[this.currentChangePoint].pixels) {
+            if(this.changePoints[this.currentChangePoint].decision) {
+                this.gameOver = true;
+            } else {
+                this.nextAnimation.sprite.play(this.nextAnimation.animation);
+            }
+        }
+    }
+
+    Gameworld.prototype.nextLinearAnimation = function() {
+        this.cursor++;
+        this.nextAnimation = this.timeline[this.cursor];
     }
 
     Gameworld.prototype.whatNext = function() {
