@@ -1,15 +1,8 @@
 /**
  * Loading dependencies
  */
-var fs = require('fs');
-var server = require('http');
-var url = require('url') ;
-var _ = require('underscore');
 var express = require('express');
 var SerialPort = require("serialport").SerialPort;
-
-// 1411 or 1421
-var serialPortName = "cu.usbmodem1411";
 
 /**
  * Including localStorage for permanently saving credit
@@ -20,38 +13,14 @@ if (typeof localStorage === "undefined" || localStorage === null) {
 }
 
 /**
- * Opening serial port
+ * PROGRAMM VARS
  */
-var serialPort = new SerialPort("/dev/"+serialPortName, {
-  baudrate: 57600
-});
-
-serialPort.on("open", function () {
-	console.log('SERIAL open');
-	serialPort.on('data', function(data) {
-		data = String(data);
-		console.log('SERIAL data received: ' + data);
-		if(String(data) == String("e:1")) {
-			// on ejected
-			io.sockets.emit('MACHINE__message', { message: 'ejected' });
-		} else if(String(data.substring(0, 2)) == String("c:")) {
-			// on coin
-			var coinVal = data.substring(2, data.length-1);
-			console.log(coinVal);
-			io.sockets.emit('MACHINE__hasCoin', { coin: coinVal });
-			console.log('COIN inserted: '+coinVal);
-		}  
-	});
-
-  	// client requests ejection
-	io.sockets.on('MACHINE__eject', function (data) {
-		// eject machine here
-		serialPort.write("e\n", function(err, results) {
-			console.log('SERIAL error ' + err);
-			console.log('SERIAL results ' + results);
-		});
-	});
-});
+// The amount of money users have inserted from the first day
+var globalCredit = localStorage.getItem('globalCredit') || 0;
+// The current state that says whether a user is in front of the machine or not
+var userInFront = false;
+// The Serial Port name 1411 or 1421
+var serialPortName = "cu.usbmodem1411";
 
 /**
  * Starting express app
@@ -76,21 +45,7 @@ app.use(express.static(__dirname + '/'));
 // Starting socket connection
 var io = require('socket.io').listen(server);
 
-/**
- * PROGRAMM VARS
- */
-// The amount of money users have inserted from the first day
-var globalCredit = localStorage.getItem('globalCredit') || 0;
-// The current state that says whether a user is in front of the machine or not
-var userInFront = false;
-
-// Websocket
-io.sockets.on('connection', function (socket) {
-// der Client ist verbunden
-});
-
-
-// on get user message via http ?user=val
+// on get user message via http /controller?kinect={true;false}
 app.get('/controller', function (req, res) {
 	console.log(req.query.kinect);
 	if(req.query.kinect == "true") {
@@ -100,4 +55,38 @@ app.get('/controller', function (req, res) {
 	}
 	res.send('KINECT status set to '+userInFront+'.');
   	io.sockets.emit('KINECT__stateChange', { state: userInFront });
+});
+
+/**
+ * Opening serial port and performing all the actions
+ */
+var serialPort = new SerialPort("/dev/"+serialPortName, {
+  baudrate: 57600
+});
+
+serialPort.on("open", function () {
+	console.log('SERIAL open');
+	serialPort.on('data', function(data) {
+		data = String(data);
+		console.log('SERIAL data received: ' + data);
+		if(String(data) == String("e:1")) {
+			// on ejected
+			io.sockets.emit('MACHINE__message', { message: 'ejected' });
+		} else if(String(data.substring(0, 2)) == String("c:")) {
+			// on coin
+			var coinVal = data.substring(2, data.length-1);
+			globalCredit += coinVal;
+			localStorage.setItem('globalCredit', globalCredit);
+			io.sockets.emit('MACHINE__hasCoin', { coin: coinVal });
+		}  
+	});
+
+  	// client requests ejection
+	io.sockets.on('MACHINE__eject', function (data) {
+		// eject machine here
+		serialPort.write("e\n", function(err, results) {
+			console.log('SERIAL error ' + err);
+			console.log('SERIAL results ' + results);
+		});
+	});
 });
