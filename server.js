@@ -8,6 +8,9 @@ var _ = require('underscore');
 var express = require('express');
 var SerialPort = require("serialport").SerialPort;
 
+// 1411 or 1421
+var serialPortName = "cu.usbmodem1411";
+
 /**
  * Including localStorage for permanently saving credit
  */
@@ -19,20 +22,22 @@ if (typeof localStorage === "undefined" || localStorage === null) {
 /**
  * Opening serial port
  */
-var serialPort = new SerialPort("/dev/tty-usbserial1", {
+var serialPort = new SerialPort("/dev/"+serialPortName, {
   baudrate: 57600
 });
 
 serialPort.on("open", function () {
 	console.log('SERIAL open');
 	serialPort.on('data', function(data) {
+		data = String(data);
 		console.log('SERIAL data received: ' + data);
-		if(data == 'e:1') {
+		if(String(data) == String("e:1")) {
 			// on ejected
 			io.sockets.emit('MACHINE__message', { message: 'ejected' });
-		} else if(data.substring(0, 1) == 'p:') {
+		} else if(String(data.substring(0, 2)) == String("c:")) {
 			// on coin
 			var coinVal = data.substring(2, data.length-1);
+			console.log(coinVal);
 			io.sockets.emit('MACHINE__hasCoin', { coin: coinVal });
 			console.log('COIN inserted: '+coinVal);
 		}  
@@ -94,5 +99,5 @@ app.get('/controller', function (req, res) {
 		userInFront = false;
 	}
 	res.send('KINECT status set to '+userInFront+'.');
-  	io.sockets.emit('KINECT_stateChange', { state: userInFront });
+  	io.sockets.emit('KINECT__stateChange', { state: userInFront });
 });

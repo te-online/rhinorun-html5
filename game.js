@@ -47,7 +47,7 @@ $(document).ready( function() {
     // Connect Web socket
     socket = io.connect();
 
-    socket.on('KINECT_stateChange', function (data) {
+    socket.on('KINECT__stateChange', function (data) {
         // Wenn kinect changes
         //  wenn user == true und ext_teaser !playing
         if(data.state && $('video[data-type=ext_teaser]').vid_numPlaying() == 0) {
@@ -66,7 +66,11 @@ $(document).ready( function() {
         } 
     });
 
-    socket.on('MACHINE_hasCoin', function (data) {
+    socket.on('MACHINE__hasCoin', function (data) {
+        hasCoin(data);           
+    });
+
+    function hasCoin(data) {
         // Wenn money
         // wenn walking spielt
         if($('video[data-type=walking]').vid_numPlaying() > 0) {
@@ -79,6 +83,7 @@ $(document).ready( function() {
             $('video[data-type=teaser]').fadeOut(function() {
                 $(this).vid_stop();
                 $('video[data-type=walking][data-id='+currentLevel+']').fadeIn().vid_play();
+                currentDecision = 0;
             });
         } else if($('video[data-type=ext_teaser]').vid_numPlaying() > 0) {
             $('video[data-type=ext_teaser]').fadeOut(function() {
@@ -89,8 +94,8 @@ $(document).ready( function() {
             // sonst addiere zu wrong money 
             wrongCredit += data.coin;
             $('.wrongCredit').text(parseMoney(wrongCredit));
-        }             
-    });
+        }  
+    }
 
 
     /**
@@ -109,6 +114,7 @@ $(document).ready( function() {
             // Blende walking aus
             $(this).vid_stop().fadeOut( function() {
                 // Zeige gameover mit id = 0 (Standard Gameover)
+                console.log('gameover 0');
                 $('video[data-type=gameover][data-id=0]').fadeIn().vid_play();
             });
         }
@@ -123,6 +129,8 @@ $(document).ready( function() {
             $(this).vid_stop().hide();
             // Spiele nächstes walking
             $('video[data-type=walking][data-id='+currentLevel+']').show().vid_play();
+            // Reset current decision
+            currentDecision = 0;
         } else {
             // Verstecke option
             $(this).vid_stop().hide();
@@ -137,7 +145,7 @@ $(document).ready( function() {
 
     $('video[data-type=walking]').bind('timeupdate', function() {
         // Wenn 400ms vor Ende
-        if((($(this).vid_duration() - $(this).vid_currentTime()) <= decisionTime) && $(this).attr('data-callToAction') == "false") {
+        if((($(this).vid_duration() - $(this).vid_currentTime()) <= decisionTime) && $(this).attr('data-callToAction') != "true") {
             $('.optionIcons[data-id='+currentLevel+']').fadeIn();
             $(this).attr('data-callToAction', 'true');
         }
@@ -145,7 +153,7 @@ $(document).ready( function() {
 
     $('video[data-type=gameover]').on('timeupdate', function() {
         // Wenn 400ms vor Ende
-        if((($(this).vid_duration() - $(this).vid_currentTime()) <= 400) && $(this).attr('data-animated') == "false") {
+        if((($(this).vid_duration() - $(this).vid_currentTime()) <= 400) && $(this).attr('data-animated') != "true") {
             $(this).attr('data-animated', 'true');
             $(this).fadeOut( function() {
                 $(this).attr('data-animated', 'false');
@@ -162,10 +170,22 @@ $(document).ready( function() {
      * Parse cents in euro readable format
      */
     function parseMoney(cents) {
+        cents = cents/100;
         cents = ""+cents;
         cents = cents.replace(".", ",");
         return cents + " €";
     }
+
+    /**
+     * Debugging
+     */
+    document.addEventListener('keydown', function(event) {
+        if(event.keyCode == 37) {
+            hasCoin({coin: 50});
+        } else if(event.keyCode == 39) {
+            hasCoin({coin: 100});
+        }
+    });
     
 });
 
@@ -216,7 +236,7 @@ jQuery.fn.extend({
   vid_numPlaying: function() {
     var numPlaying = 0;
     this.each(function(i, item) {
-        if($(item)[0].paused) {
+        if(!$(item)[0].paused) {
             numPlaying++;
         }
     });
