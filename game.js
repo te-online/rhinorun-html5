@@ -37,6 +37,10 @@ $(document).ready( function() {
     $('video[data-type=teaser]')[0].loop = true;
     $('video[data-type=ext_teaser]')[0].loop = true;
 
+    // Don't display overlays
+    $('.optionIcons').hide();
+    $('.wintext').hide();
+
     /**
      * SOCKET CONNECTION
      */
