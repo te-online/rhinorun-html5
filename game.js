@@ -1,223 +1,156 @@
-window.onload = function() {
-
-    var rhinorun = new Gameworld;
-    var coinmachine = new Machine;
-
-    var background;
-
-    var game = new Phaser.Game(
-        window.innerWidth, 
-        window.innerHeight, 
-        Phaser.AUTO, '', 
-        { 
-            preload: function() {
-                rhinorun.preload();
-            },  
-            create: function() {
-                rhinorun.create();
-            }, 
-            update: function() { 
-                rhinorun.refresh(); 
-            } 
-        }
-    );
-
+$(document).ready( function() {
+    /**
+     * SETTINGS VARS
+     */
+    // The number of levels available
+    var numLevels = 5;
+    // The time before end of walking scene when options appear to user (in ms)
+    var decisionTime = 10000;
+    // The coins available (SYNTAX?)
+    var availableCoins =  { '50': '1', '100': '2' };
 
     /**
-     * Paser.Animation.generateFrameNames(prefix, start, stop, suffix, zeroPad) zeroPad = number of decimals
+     * PROGRAMM VARS
      */
-
+    // The current level and start level = 1
+    var currentLevel = 1;
+    // The current amount of money inserted
+    var currentCredit = 0;
+    // The current amount of money inserted when not being called to
+    var wrongCredit = 0;
+    // The current decision of the user
+    var currentDecision = 0;
 
     /**
-     * Gameworld
+     * SOCKET CONNECTION
      */
+    // Connect Web socket
+    socket = io.connect();
 
-    function Gameworld() {
-        this.teaser = true;
-        this.extendedTeaser = false;
-        this.gameOver = false;
+    socket.on('KINECT_stateChange', function (data) {
+        // Wenn kinect changes
+        //  wenn user == true und ext_teaser !playing
+        if(data.state && $('video[data-type=ext_teaser]:playing').size() == 0) {
+            //      fade teaser aus und ext_teaser ein
+            $('video[data-type=teaser]').fadeOut(function() {
+                $(this).stop();
+            });
+            $('video[data-type=ext_teaser]').play().fadeIn();
+        } else if(!data.state && $('video[data-type=teaser]:playing').size() == 0) {
+             //  wenn user == false and teaser !playing
+             //  fade teaser ein und ext_teaser aus
+            $('video[data-type=ext_teaser]').fadeOut(function() {
+                $(this).stop();
+            });
+            $('video[data-type=teaser]').play().fadeIn();
+        }        
+    });
 
-        this.currentDecision = 0;
-        this.currentScene = null;
-
-        this.animationObjects = {};
-
-        this.sceneA = null;
-        this.sceneB = null;
-
-        this.frameNum = 0;
-        this.speed = 2;
-
-        this.isInteractive = true;
-        this.nextAnimation = null;
-
-        this.changePoints = [ 
-            { 'frame': 395 },
-            { 'frame': 408 },
-            { 'frame': 795 },
-        ];
-        this.currentChangePoint = 0;
-
-        this.timeline = [];
-        this.cursor = 0;
-    }
-
-    Gameworld.prototype.preload = function() {
-        // Background images
-        game.load.image('canyon', 'assets/backgrounds/schlucht.jpg');
-
-        // Animations
-        game.load.atlasXML('rhino__walking', 'assets/rhino__walking/rhino__walking.png', 'assets/rhino__walking/rhino__walking.xml');
-    }
-
-    Gameworld.prototype.create = function() {
-        this.animationObjects.rhino = game.add.sprite(window.innerWidth/2, 0, 'rhino__walking');
-        // Position the animation
-        this.animationObjects.rhino.y = window.innerHeight - (this.animationObjects.rhino.width/2);
-        // Mirror this animation
-        this.animationObjects.rhino.anchor.setTo(.5, .5);
-        this.animationObjects.rhino.scale.x *= -1;
-        // Add a looped animation called walk
-        this.animationObjects.rhino.animations.add('walk', null, 30, true);
-        this.animationObjects.rhino.animations.play('walk');
-
-        // Set the timeline for the whole game
-        // Rhino walks
-        this.timeline.push( { 'sprite': this.animationObjects.rhino, 'animation': 'walk' } );
-        // Problem: canyon
-        this.timeline.push( [ 
-            { 'sprite': this.animationObjects.rhino_bridge, 'animation': 'bridge' }, 
-            { 'sprite': this.animationObjects.rhino_raft, 'animation': 'raft' } 
-        ]);
-        // Rhino walks
-        this.timeline.push( { 'sprite': this.animationObjects.rhino, 'animation': 'walk' } );
-        // Problem: stones
-        this.timeline.push( [ 
-            { 'sprite': this.animationObjects.rhino_bridge, 'animation': 'bridge' }, 
-            { 'sprite': this.animationObjects.rhino_raft, 'animation': 'raft' } 
-        ]);
-    }
-
-    Gameworld.prototype.over = function() {
-        this.gameOver = true;
-    }
-
-    Gameworld.prototype.isOver = function() {
-        return this.gameOver;
-    }
-
-    Gameworld.prototype.refresh = function() {
-        // Do all the crazy stuff here
-        // console.log("refreshin");
-        if(this.frameNum % this.speed == 0) {
-            background.x -= 1;
-        }
-        this.frameNum++;
-
-        // Wenn eine Interaktion durch den User möglich ist
-        //      Wenn Geld eingeworfen wurde
-        //          Setze Entscheidung
-        //              wurde münze a eingeworfen setze entscheidung auf 1
-        //              wurde münze b eingeworfen setze entscheidung auf 2
-        //          Setze nächste Animation nach entscheidung
-        //          Interaktion durch den User ist nicht mehr möglich
-        // 
-        // Wenn ein changePoint erreicht wurde
-        //      Wenn Entscheidung erforderlich und Entscheidung == 0
-        //          leite Game Over ein
-        //      sonst
-        //          spiele nächste Animation
-        //          
-        //       
-        // Wann ist eine Interaktion möglich?
-        // Was ist die nächste Animation, wenn keine Interaktion möglich ist?
-        //    
-        if(this.isInteractive) {
-            if(this.coinmachine.hasCoin()) {
-                for(var i = 0; i < coins.length; i++) {
-                    if(this.coinmachine.whatCoin() == this.coins[i]) {
-                        this.decision = i+1;
-                    }
-                } 
-                this.cursor++;
-                this.nextAnimation = this.timeline[this.cursor][this.decision-1];
-                this.isInteractive = false;
-            }
-        }
-
-        if((background.x * -1) == this.changePoints[this.currentChangePoint].pixels) {
-            if(this.changePoints[this.currentChangePoint].decision) {
-                this.gameOver = true;
-            } else {
-                this.nextAnimation.sprite.play(this.nextAnimation.animation);
-            }
-        }
-    }
-
-    Gameworld.prototype.nextLinearAnimation = function() {
-        this.cursor++;
-        this.nextAnimation = this.timeline[this.cursor];
-    }
-
-    Gameworld.prototype.whatNext = function() {
-        // Decide whats going on next
-    }
-
-
-    /**
-     * Machine
-     */
-    
-    function Machine() {
-        this.credit = 0;
-        this.hasCoin = false;
-        this.lastCoin = 0;
-        this.isEjecting = false;
-        this.hasEjected = false;
-    }
-
-    Machine.prototype.eject = function() {
-        // Eject money here (i.a. sending a package to server)
-        this.isEjecting = true;
-    }
-
-    Machine.prototype.endEjection = function() {
-        this.isEjecting = false;
-        this.hasEjected = true;
-    }
-
-    Machine.prototype.hasCoin = function() {
-        var hasCoin = this.hasCoin;
-        this.hasCoin = false;
-        return hasCoin;
-    }
-
-    Machine.prototype.whatCoin = function() {
-        var lastCoin = this.lastCoin;
-        this.lastCoin = 0;
-        return lastCoin;
-    }
-
-    Machine.prototype.setCoin = function(coinValue) {
-        this.hasCoin = true;
-        this.lastCoin = coinValue;
-    }
-
-    Machine.prototype.hasEjected = function() {
-        if(this.isEjecting == false && this.hasEjected == true) {
-            this.hasEjected = false;
-            return true;
+    socket.on('MACHINE_hasCoin', function (data) {
+        // Wenn money
+        //  wenn walking spielt
+        if($('video[data-type=walking]:playing').size() > 0) {
+            //  addiere Betrag zu value
+            currentCredit += data.coin;
+            //      setze decision
+            currentDecision = availableCoins[data.coin];
         } else {
-            return false;
+            //  sonst
+            //  addiere zu wrong money 
+            wrongCredit += data.coin;
+        }             
+    });
+
+
+    /**
+     * LISTENERS
+     */
+
+    // Wenn video walking on end
+    $(document).on('end', 'video[data-type=walking]', function() {
+        $('.optionIcons').fadeOut();
+        $(this).attr('data-callToAction', 'false');
+        if(currentDecision > 0) {
+            // Verstecke walking
+            $(this).stop().hide();
+            $('video[data-type=option][data-id='+currentDecision+']').show().play();
+        } else {
+            // Blende walking aus
+            $(this).stop().fadeOut( function() {
+                // Zeige gameover mit id = 0 (Standard Gameover)
+                $('video[data-type=gameover][data-id=0]').fadeIn().play();
+            });
         }
-    }
+    });
 
-    Machine.prototype.credit = function() {
-        return this.credit;
-    }
+    // Wenn video option on end
+    $(document).on('end', 'video[data-type=option]', function() {
+        // Wenn letztes Level noch nicht erreicht
+        if(currentLevel + 1 <= numLevels) {
+            currentLevel++;
+            // Verstecke option
+            $(this).stop().hide();
+            // Spiele nächstes walking
+            $('video[data-type=walking][data-id='+currentLevel+']').show().play();
+        } else {
+            // Verstecke option
+            $(this).stop().hide();
+            // Zeige gameover mit id = 1 (Win Gameover)
+            $('video[data-type=option][data-id=1]').show().play();
+            /**
+             * Zeige hier ggf. noch einen Text mit dem currentCredit
+             * Gib hier das Geld zurück
+             */
+            socket.emit('MACHINE__eject', true);
+        }
+    });
 
-    Machine.prototype.setCredit = function(credit) {
-        this.credit = credit;
-    }
+    // Wenn teaser on end
+    $(document).on('end', 'video[data-type=teaser]', function() {
+        // rewind teaser and play again
+    });
+
+    // Wenn ext_teaser on end
+    $(document).on('end', 'video[data-type=ext_teaser]', function() {
+        // rewind ext_teaser and play again
+    });
+
+    $(document).on('play', 'video[data-type=walking]', function() {
+        // Wenn 400ms vor Ende
+        if((($(this).duration() - $(this).time()) <= decisionTime) && $(this).attr('data-callToAction') == "false") {
+            $('.optionIcons').fadeIn();
+            $(this).attr('data-callToAction', 'true');
+        }
+    })
+
+    $(document).on('play', 'video[data-type=gameover]', function() {
+        // Wenn 400ms vor Ende
+        if((($(this).duration() - $(this).time()) <= 400) && $(this).attr('data-animated') == "false") {
+            $(this).attr('data-animated', 'true');
+            $(this).fadeOut( function() {
+                $(this).attr('data-animated', 'false');
+                $(this).stop();
+            });
+            $('video[data-type=teaser]').fadeIn().play();
+            currentLevel = 1;
+            currentCredit = 0;
+        }
+    });
+
+    jQuery.fn.extend({
+      play: function() {
+        return this.each(function(i, item) {
+          this.play();
+        });
+      },
+      stop: function() {
+        return this.each(function() {
+          this.stop();
+        });
+      }
+    });
+    
+});
+
 
 };
