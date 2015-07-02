@@ -22,11 +22,20 @@ $(document).ready( function() {
     var currentDecision = 0;
 
     /**
-     * Disable Video controls
+     * Initial Video configuration
      */
+    // Disable video controls
     $('video').each(function(i, item) {
         $(item)[0].controls = false;
     });
+    // Hide all videos
+    $('video').hide();
+    // Play the first one
+    $('video[data-type=teaser]').fadeIn().vid_play();
+
+    // Looping teaser and extended teaser
+    $('video[data-type=teaser]')[0].loop = true;
+    $('video[data-type=ext_teaser]')[0].loop = true;
 
     /**
      * SOCKET CONNECTION
@@ -50,7 +59,7 @@ $(document).ready( function() {
                 $(this).vid_stop();
             });
             $('video[data-type=teaser]').vid_play().fadeIn();
-        }        
+        } 
     });
 
     socket.on('MACHINE_hasCoin', function (data) {
@@ -60,17 +69,17 @@ $(document).ready( function() {
             // addiere Betrag zu value
             currentCredit += data.coin;
             // setze decision
-            currentDecision = availableCoins.(data.coin);
+            currentDecision = availableCoins[data.coin];
             $('.currentCredit').text(parseMoney(currentCredit));
         } else if($('video[data-type=teaser]').vid_numPlaying() > 0) {
             $('video[data-type=teaser]').fadeOut(function() {
                 $(this).vid_stop();
-                $('video[data-type=walk][data-id='+currentLevel+']').fadeIn().vid_play();
+                $('video[data-type=walking][data-id='+currentLevel+']').fadeIn().vid_play();
             });
         } else if($('video[data-type=ext_teaser]').vid_numPlaying() > 0) {
             $('video[data-type=ext_teaser]').fadeOut(function() {
                 $(this).vid_stop();
-                $('video[data-type=walk][data-id='+currentLevel+']').fadeIn().vid_play();
+                $('video[data-type=walking][data-id='+currentLevel+']').fadeIn().vid_play();
             });
         } else {
             // sonst addiere zu wrong money 
@@ -85,13 +94,13 @@ $(document).ready( function() {
      */
 
     // Wenn video walking on end
-    $(document).on('end', 'video[data-type=walking]', function() {
+    $(document).on('ended', 'video[data-type=walking]', function() {
         $('.optionIcons').fadeOut();
         $(this).attr('data-callToAction', 'false');
         if(currentDecision > 0) {
             // Verstecke walking
             $(this).vid_stop().hide();
-            $('video[data-type=option][data-id='+currentDecision+']').show().vid_play();
+            $('video[data-type=option][data-decision='+currentDecision+'][data-id='+currentLevel+']').show().vid_play();
         } else {
             // Blende walking aus
             $(this).vid_stop().fadeOut( function() {
@@ -102,7 +111,7 @@ $(document).ready( function() {
     });
 
     // Wenn video option on end
-    $(document).on('end', 'video[data-type=option]', function() {
+    $(document).on('ended', 'video[data-type=option]', function() {
         // Wenn letztes Level noch nicht erreicht
         if(currentLevel + 1 <= numLevels) {
             currentLevel++;
@@ -114,24 +123,12 @@ $(document).ready( function() {
             // Verstecke option
             $(this).vid_stop().hide();
             // Zeige gameover mit id = 1 (Win Gameover)
-            $('video[data-type=option][data-id=1]').show().vid_play();
+            $('video[data-type=gameover][data-id=1]').show().vid_play();
             // Zeige hier ggf. noch einen Text mit dem currentCredit
             $('.wintext').fadeIn();
             // Gib hier das Geld zurück
             socket.emit('MACHINE__eject', true);
         }
-    });
-
-    // Wenn teaser on end
-    $(document).on('ended', 'video[data-type=teaser]', function() {
-        // rewind teaser and play again
-        $(this).vid_loop();
-    });
-
-    // Wenn ext_teaser on end
-    $(document).on('ended', 'video[data-type=ext_teaser]', function() {
-        // rewind ext_teaser and play again
-        $(this).vid_loop();
     });
 
     $(document).on('timeupdate', 'video[data-type=walking]', function() {
@@ -158,57 +155,6 @@ $(document).ready( function() {
     });
 
     /**
-     * Extend jQuery for the HMTL5 video functions of DOM
-     * Iterate through each object and apply DOM-functions
-     */
-    jQuery.fn.extend({
-      vid_play: function() {
-        return this.each(function(i, item) {
-          this.play();
-        });
-      },
-      vid_stop: function() {
-        return this.each(function() {
-          this.pause();
-          this.currentTime = 0;
-        });
-      },
-      vid_pause: function() {
-        return this.each(function() {
-            this.pause();
-        });
-      },
-      vid_duration: function() {
-        // in seconds, but we want milliseconds
-        return this[0].duration * 1000;
-      },
-      vid_currentTime: function() {
-        // in seconds, but we want milliseconds
-        return this[0].currentTime * 1000;
-      },
-      vid_jumpTo: function(milliseconds) {
-        this[0].currentTime = second/1000;
-      },
-      vid_loop: function() {
-        return this.each(function(i, item) {
-          this.loop = true;
-        });
-      },
-      vid_playing: function() {
-        return !this[0].paused;
-      },
-      vid_numPlaying: function() {
-        var numPlaying = 0;
-        this.each(function(i, item) {
-            if($(item)[0].paused) {
-                numPlaying++;
-            }
-        });
-        return numPlaying;
-      }
-    });
-
-    /**
      * Parse cents in euro readable format
      */
     function parseMoney(cents) {
@@ -219,5 +165,57 @@ $(document).ready( function() {
     
 });
 
-
-};
+/**
+ * Extend jQuery for the HMTL5 video functions of DOM
+ * Iterate through each object and apply DOM-functions
+ */
+jQuery.fn.extend({
+  vid_play: function() {
+    return this.each(function(i, item) {
+      this.play();
+    });
+    console.log("playing");
+  },
+  vid_stop: function() {
+    return this.each(function() {
+      this.pause();
+      this.currentTime = 0;
+    });
+    console.log("stopping");
+  },
+  vid_pause: function() {
+    return this.each(function() {
+        this.pause();
+    });
+  },
+  vid_duration: function() {
+    // in seconds, but we want milliseconds
+    return this[0].duration * 1000;
+  },
+  vid_currentTime: function() {
+    // in seconds, but we want milliseconds
+    return this[0].currentTime * 1000;
+  },
+  vid_jumpTo: function(milliseconds) {
+    this[0].currentTime = second/1000;
+  },
+  vid_loop: function() {
+    return this.each(function() {
+      this.loop = true;
+      console.log(this);
+    });
+    console.log("looping");
+  },
+  vid_playing: function() {
+    return !this[0].paused;
+  },
+  vid_numPlaying: function() {
+    var numPlaying = 0;
+    this.each(function(i, item) {
+        if($(item)[0].paused) {
+            numPlaying++;
+        }
+    });
+    return numPlaying;
+  }
+});
