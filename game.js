@@ -134,7 +134,7 @@ $(document).ready( function() {
     $('video[data-type=walking]').bind('timeupdate', function() {
         // Wenn 400ms vor Ende
         if((($(this).vid_duration() - $(this).vid_currentTime()) <= decisionTime) && $(this).attr('data-callToAction') == "false") {
-            $('.optionIcons').fadeIn();
+            $('.optionIcons[data-id='+currentLevel+']').fadeIn();
             $(this).attr('data-callToAction', 'true');
         }
     })
