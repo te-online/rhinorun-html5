@@ -94,7 +94,7 @@ $(document).ready( function() {
      */
 
     // Wenn video walking on end
-    $(document).on('ended', 'video[data-type=walking]', function() {
+    $('video[data-type=walking]').bind('ended', function() {
         $('.optionIcons').fadeOut();
         $(this).attr('data-callToAction', 'false');
         if(currentDecision > 0) {
@@ -111,7 +111,7 @@ $(document).ready( function() {
     });
 
     // Wenn video option on end
-    $(document).on('ended', 'video[data-type=option]', function() {
+    $('video[data-type=option]').bind('ended', function() {
         // Wenn letztes Level noch nicht erreicht
         if(currentLevel + 1 <= numLevels) {
             currentLevel++;
@@ -131,7 +131,7 @@ $(document).ready( function() {
         }
     });
 
-    $(document).on('timeupdate', 'video[data-type=walking]', function() {
+    $('video[data-type=walking]').bind('timeupdate', function() {
         // Wenn 400ms vor Ende
         if((($(this).vid_duration() - $(this).vid_currentTime()) <= decisionTime) && $(this).attr('data-callToAction') == "false") {
             $('.optionIcons').fadeIn();
@@ -139,7 +139,7 @@ $(document).ready( function() {
         }
     })
 
-    $(document).on('timeupdate', 'video[data-type=gameover]', function() {
+    $('video[data-type=gameover]').on('timeupdate', function() {
         // Wenn 400ms vor Ende
         if((($(this).vid_duration() - $(this).vid_currentTime()) <= 400) && $(this).attr('data-animated') == "false") {
             $(this).attr('data-animated', 'true');
