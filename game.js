@@ -196,6 +196,15 @@ $(document).ready( function() {
       },
       vid_playing: function() {
         return !this[0].paused;
+      },
+      vid_numPlaying: function() {
+        var numPlaying = 0;
+        this.each(function(i, item) {
+            if($(item)[0].paused) {
+                numPlaying++;
+            }
+        });
+        return numPlaying;
       }
     });
 
