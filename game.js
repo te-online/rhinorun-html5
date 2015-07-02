@@ -33,11 +33,17 @@ window.onload = function() {
      */
 
     function Gameworld() {
+        this.teaser = true;
+        this.extendedTeaser = false;
         this.gameOver = false;
 
         this.currentDecision = 0;
+        this.currentScene = null;
 
         this.animationObjects = {};
+
+        this.sceneA = null;
+        this.sceneB = null;
 
         this.frameNum = 0;
         this.speed = 2;
@@ -46,15 +52,9 @@ window.onload = function() {
         this.nextAnimation = null;
 
         this.changePoints = [ 
-            {   'pixels': 395, 
-                'decision': true
-            },
-            {   'pixels': 408, 
-                'decision': true
-            },
-            {   'pixels': 795, 
-                'decision': false
-            }, 
+            { 'frame': 395 },
+            { 'frame': 408 },
+            { 'frame': 795 },
         ];
         this.currentChangePoint = 0;
 
@@ -71,8 +71,6 @@ window.onload = function() {
     }
 
     Gameworld.prototype.create = function() {
-        background = game.add.image(0, 0, 'canyon');
-
         this.animationObjects.rhino = game.add.sprite(window.innerWidth/2, 0, 'rhino__walking');
         // Position the animation
         this.animationObjects.rhino.y = window.innerHeight - (this.animationObjects.rhino.width/2);
@@ -84,8 +82,20 @@ window.onload = function() {
         this.animationObjects.rhino.animations.play('walk');
 
         // Set the timeline for the whole game
+        // Rhino walks
         this.timeline.push( { 'sprite': this.animationObjects.rhino, 'animation': 'walk' } );
-        this.timeline.push( [ { 'sprite': this.animationObjects.rhino, 'animation': 'walk' }, { 'sprite': this.animationObjects.rhino, 'animation': 'walk' } ]);
+        // Problem: canyon
+        this.timeline.push( [ 
+            { 'sprite': this.animationObjects.rhino_bridge, 'animation': 'bridge' }, 
+            { 'sprite': this.animationObjects.rhino_raft, 'animation': 'raft' } 
+        ]);
+        // Rhino walks
+        this.timeline.push( { 'sprite': this.animationObjects.rhino, 'animation': 'walk' } );
+        // Problem: stones
+        this.timeline.push( [ 
+            { 'sprite': this.animationObjects.rhino_bridge, 'animation': 'bridge' }, 
+            { 'sprite': this.animationObjects.rhino_raft, 'animation': 'raft' } 
+        ]);
     }
 
     Gameworld.prototype.over = function() {
