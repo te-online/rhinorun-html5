@@ -39,6 +39,7 @@ $(document).ready( function() {
 
     // Don't display overlays
     $('.optionIcons').hide();
+    // $('.optionIcons').eq(0).show();
     $('.wintext').hide();
 
     /**
@@ -147,7 +148,7 @@ $(document).ready( function() {
     $('video[data-type=walking]').bind('timeupdate', function() {
         // Wenn 400ms vor Ende
         if((($(this).vid_duration() - $(this).vid_currentTime()) <= decisionTime) && $(this).attr('data-callToAction') != "true") {
-            $('.optionIcons[data-id='+currentLevel+']').fadeIn();
+            $('.optionIcons[data-id='+currentLevel+']').fadeIn().find('.optionTimer').startTimer(decisionTime);
             $(this).attr('data-callToAction', 'true');
         }
     })
@@ -178,6 +179,10 @@ $(document).ready( function() {
     }
 
     /**
+     * Aimate optionTimer as a clock
+     */
+
+    /**
      * Debugging
      */
     document.addEventListener('keydown', function(event) {
@@ -190,57 +195,80 @@ $(document).ready( function() {
     
 });
 
+
 /**
  * Extend jQuery for the HMTL5 video functions of DOM
  * Iterate through each object and apply DOM-functions
  */
 jQuery.fn.extend({
-  vid_play: function() {
-    return this.each(function(i, item) {
-      this.play();
-    });
-    console.log("playing");
-  },
-  vid_stop: function() {
-    return this.each(function() {
-      this.pause();
-      this.currentTime = 0;
-    });
-    console.log("stopping");
-  },
-  vid_pause: function() {
-    return this.each(function() {
-        this.pause();
-    });
-  },
-  vid_duration: function() {
-    // in seconds, but we want milliseconds
-    return this[0].duration * 1000;
-  },
-  vid_currentTime: function() {
-    // in seconds, but we want milliseconds
-    return this[0].currentTime * 1000;
-  },
-  vid_jumpTo: function(milliseconds) {
-    this[0].currentTime = second/1000;
-  },
-  vid_loop: function() {
-    return this.each(function() {
-      this.loop = true;
-      console.log(this);
-    });
-    console.log("looping");
-  },
-  vid_playing: function() {
-    return !this[0].paused;
-  },
-  vid_numPlaying: function() {
-    var numPlaying = 0;
-    this.each(function(i, item) {
-        if(!$(item)[0].paused) {
-            numPlaying++;
-        }
-    });
-    return numPlaying;
-  }
+    vid_play: function() {
+        return this.each(function(i, item) {
+          this.play();
+        });
+        console.log("playing");
+    },
+    vid_stop: function() {
+        return this.each(function() {
+          this.pause();
+          this.currentTime = 0;
+        });
+        console.log("stopping");
+    },
+    vid_pause: function() {
+        return this.each(function() {
+            this.pause();
+        });
+    },
+    vid_duration: function() {
+        // in seconds, but we want milliseconds
+        return this[0].duration * 1000;
+    },
+    vid_currentTime: function() {
+        // in seconds, but we want milliseconds
+        return this[0].currentTime * 1000;
+    },
+    vid_jumpTo: function(milliseconds) {
+        this[0].currentTime = second/1000;
+    },
+    vid_loop: function() {
+        return this.each(function() {
+          this.loop = true;
+          console.log(this);
+        });
+        console.log("looping");
+    },
+    vid_playing: function() {
+        return !this[0].paused;
+    },
+    vid_numPlaying: function() {
+        var numPlaying = 0;
+        this.each(function(i, item) {
+            if(!$(item)[0].paused) {
+                numPlaying++;
+            }
+        });
+        return numPlaying;
+    },
+    startTimer: function(milliseconds) {
+        var t = milliseconds/360;
+        $(this).drawTimer(t, 360);
+    },
+    drawTimer: function(speed, alpha) {
+        var timer = this[0];
+        var α = alpha;
+        var π = Math.PI;
+        α--;
+        α %= 360;
+        var r = ( α * π / 180 );
+        var x = Math.sin( r ) * 125;
+        var y = Math.cos( r ) * - 125;
+        var mid = ( α > 180 ) ? 1 : 0;
+        var anim = 'M 0 0 v -125 A 125 125 1 ' + mid + ' 1 ' +  x  + ' ' +  y  + ' z';
+     
+        timer.setAttribute( 'd', anim );
+      
+        setTimeout(function() {
+            $(timer).drawTimer(speed, α);
+        }, speed); // Redraw
+    }
 });
