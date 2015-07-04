@@ -81,6 +81,8 @@ $(document).ready( function() {
             // setze decision
             currentDecision = availableCoins[data.coin];
             $('.currentCredit').text(parseMoney(currentCredit));
+            $('.optionIcons[data-id='+currentLevel+'] .optionIcon[data-id='+data.coin+']').addClass('paid');
+            $('.optionIcons[data-id='+currentLevel+'] .optionIcon:not([data-id='+data.coin+'])').addClass('notpaid');
         } else if($('video[data-type=teaser]').vid_numPlaying() > 0) {
             $('video[data-type=teaser]').fadeOut(function() {
                 $(this).vid_stop();
@@ -106,7 +108,8 @@ $(document).ready( function() {
 
     // Wenn video walking on end
     $('video[data-type=walking]').bind('ended', function() {
-        $('.optionIcons').fadeOut();
+        $('.optionIcons[data-id='+currentLevel+']').fadeOut();
+        $('.optionIcons[data-id='+currentLevel+'] .optionIcon').removeClass('notpaid').removeClass('paid');
         $(this).attr('data-callToAction', 'false');
         if(currentDecision > 0) {
             // Verstecke walking

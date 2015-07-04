@@ -45,6 +45,15 @@ video {
 }
 .optionIcon {
 	width: 32%;
+	border-radius: 25%;
+	transition: all 500ms ease-in-out;
+}
+.optionIcon.paid {
+	opacity: 1;
+	background-color: rgba(248, 172, 62, 0.5);
+}
+.optionIcon.notpaid {
+	opacity: 0.25;
 }
 .optionIcon[data-id="50"] {
 	-webkit-animation: moveup 10s ease-in-out infinite;
