@@ -48,6 +48,7 @@ $(document).ready( function() {
     socket = io.connect();
 
     socket.on('KINECT__stateChange', function (data) {
+        console.log('KINECT is now '+data.state);
         // Wenn kinect changes
         //  wenn user == true und ext_teaser !playing
         if(data.state && $('video[data-type=ext_teaser]').vid_numPlaying() == 0) {

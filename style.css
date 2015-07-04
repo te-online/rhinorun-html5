@@ -1,0 +1,109 @@
+body {
+        margin: 0;
+        padding: 0;
+}
+video {
+	width: 100vw;
+	height: 100vh;
+	position: absolute;
+	top: 0;
+	left: 0;
+}
+.optionIcons {
+	position: absolute;
+	left: 25vw;
+	width: 50vw;
+	top: 20vh;
+	background-color: rgba(255, 0, 0, 0.2);
+	z-index: 9999;
+}
+.wintext {
+	position: absolute;
+	left: 50vw;
+	top: 50vh;
+	background-color: rgb(255, 255, 255);
+	z-index: 9999;
+}
+.optionIcon {
+	width: 30%;
+	float: left;
+	transition: all 1s;
+}
+.optionIcon[data-id="50"] {
+	-webkit-animation: moveup 10s ease-in-out infinite;
+	        animation: moveup 10s ease-in-out infinite;
+	margin-right: 2rem;
+}
+.optionIcon[data-id="100"] {
+	margin-top: -2vh;
+	-webkit-animation: movedown 10s ease-in-out infinite;
+	        animation: movedown 10s ease-in-out infinite;
+}
+@-webkit-keyframes moveup {
+	0% {
+		margin-top: 0;
+	}
+	25% {
+		margin-top: -2vh;
+	}
+	50% {
+		margin-top: 0;
+	}
+	75% {
+		margin-top: 4vh;
+	}
+	100% {
+		margin-top: 0;
+	}
+}
+@keyframes moveup {
+	0% {
+		margin-top: 0;
+	}
+	25% {
+		margin-top: -2vh;
+	}
+	50% {
+		margin-top: 2vh;
+	}
+	75% {
+		margin-top: 4vh;
+	}
+	100% {
+		margin-top: 0;
+	}
+}
+@-webkit-keyframes movedown {
+	0% {
+		margin-top: -2vh;
+	}
+	25% {
+		margin-top: 2vh;
+	}
+	50% {
+		margin-top: 4vh;
+	}
+	75% {
+		margin-top: 0;
+	}
+	100% {
+		margin-top: -2vh;
+	}
+}
+@keyframes movedown {
+	0% {
+		margin-top: -2vh;
+	}
+	25% {
+		margin-top: 2vh;
+	}
+	50% {
+		margin-top: 4vh;
+	}
+	75% {
+		margin-top: 0;
+	}
+	100% {
+		margin-top: -2vh;
+	}
+}

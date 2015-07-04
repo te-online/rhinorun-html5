@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
     <head>
         <meta charset="UTF-8" />
@@ -6,33 +6,7 @@
         <script src="jquery-2.1.4.min.js"></script>
         <script src="game.js"></script>
         <script src="socket.io/socket.io.js"></script>
-        <style>
-        	body {
-        		margin: 0;
-        		padding: 0;
-        	}
-        	video {
-        		width: 100vw;
-        		height: 100vh;
-        		position: absolute;
-        		top: 0;
-        		left: 0;
-        	}
-        	.optionIcons {
-        		position: absolute;
-        		left: 50vw;
-        		top: 10vh;
-        		background-color: rgba(255, 0, 0, 0.2);
-        		z-index: 9999;
-        	}
-        	.wintext {
-        		position: absolute;
-        		left: 50vw;
-        		top: 50vh;
-        		background-color: rgb(255, 255, 255);
-        		z-index: 9999;
-        	}
-        </style>
+        <link rel="stylesheet" href="style.css">
     </head>
     <body>
 
@@ -60,19 +34,29 @@
 	    <video data-type="ext_teaser"><source type="video/mp4" src="assets/ext_teaser.mp4"></video>
 
 	    <div class="optionIcons" data-id="1">
-	    	Blabla, hier kommen alle Optionen hin.
+	    	<img src="assets/optionIcons/option_1_1.svg" class="optionIcon" data-id="50" />
+	    	<img src="assets/optionIcons/option_1_2.svg" class="optionIcon" data-id="100" />
+	    	Hier kommt noch ne Uhr hin.
 	    </div>
 	    <div class="optionIcons" data-id="2">
-	    	Blabla, hier kommen alle Optionen hin.
+	    	<img src="assets/optionIcons/option_2_1.svg" class="optionIcon" data-id="50" />
+	    	<img src="assets/optionIcons/option_2_2.svg" class="optionIcon" data-id="100" />
+	    	Hier kommt noch ne Uhr hin.
 	    </div>
 	    <div class="optionIcons" data-id="3">
-	    	Blabla, hier kommen alle Optionen hin.
+	    	<img src="assets/optionIcons/option_3_1.svg" class="optionIcon" data-id="50" />
+	    	<img src="assets/optionIcons/option_3_2.svg" class="optionIcon" data-id="100" />
+	    	Hier kommt noch ne Uhr hin.
 	    </div>
 	    <div class="optionIcons" data-id="4">
-	    	Blabla, hier kommen alle Optionen hin.
+	    	<img src="assets/optionIcons/option_4_1.svg" class="optionIcon" data-id="50" />
+	    	<img src="assets/optionIcons/option_4_2.svg" class="optionIcon" data-id="100" />
+	    	Hier kommt noch ne Uhr hin.
 	    </div>
 	    <div class="optionIcons" data-id="5">
-	    	Blabla, hier kommen alle Optionen hin.
+	    	<img src="assets/optionIcons/option_5_1.svg" class="optionIcon" data-id="50" />
+	    	<img src="assets/optionIcons/option_5_2.svg" class="optionIcon" data-id="100" />
+	    	Hier kommt noch ne Uhr hin.
 	    </div>
 
 	    <div class="wintext">
