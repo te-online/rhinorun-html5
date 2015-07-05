@@ -49,6 +49,12 @@ $(document).ready( function() {
     socket = io.connect();
 
     socket.on('KINECT__stateChange', function (data) {
+        if($('video[data-type=option]').vid_numPlaying() > 0 ||
+            $('video[data-type=walking]').vid_numPlaying() > 0 ||
+            $('video[data-type=gameover]').vid_numPlaying() > 0) {
+            console.log("Teaser attempt canceled");
+            return;
+        }
         console.log('KINECT is now '+data.state);
         // Wenn kinect changes
         //  wenn user == true und ext_teaser !playing
@@ -77,9 +83,10 @@ $(document).ready( function() {
         // wenn walking spielt
         if($('video[data-type=walking]').vid_numPlaying() > 0) {
             // addiere Betrag zu value
-            currentCredit += data.coin;
+            currentCredit += parseInt(data.coin);
             // setze decision
-            currentDecision = availableCoins[data.coin];
+            currentDecision = availableCoins[parseInt(data.coin)];
+            console.log("Credit: "+currentCredit+" Decision: "+currentDecision);
             $('.currentCredit').text(parseMoney(currentCredit));
             $('.optionIcons[data-id='+currentLevel+'] .optionIcon[data-id='+data.coin+']').addClass('paid');
             $('.optionIcons[data-id='+currentLevel+'] .optionIcon:not([data-id='+data.coin+'])').addClass('notpaid');
@@ -144,7 +151,7 @@ $(document).ready( function() {
             // Zeige hier ggf. noch einen Text mit dem currentCredit
             $('.wintext').fadeIn();
             // Gib hier das Geld zurück
-            socket.emit('MACHINE__eject', true);
+            socket.emit('MACHINE__eject', { eject: true });
         }
     });
 
@@ -260,18 +267,20 @@ jQuery.fn.extend({
         var timer = this[0];
         var α = alpha;
         var π = Math.PI;
-        α--;
-        α %= 360;
-        var r = ( α * π / 180 );
-        var x = Math.sin( r ) * 125;
-        var y = Math.cos( r ) * - 125;
-        var mid = ( α > 180 ) ? 1 : 0;
-        var anim = 'M 0 0 v -125 A 125 125 1 ' + mid + ' 1 ' +  x  + ' ' +  y  + ' z';
-     
-        timer.setAttribute( 'd', anim );
-      
-        setTimeout(function() {
-            $(timer).drawTimer(speed, α);
-        }, speed); // Redraw
+        if(α > 0) {
+            α--;
+            α %= 360;
+            var r = ( α * π / 180 );
+            var x = Math.sin( r ) * 125;
+            var y = Math.cos( r ) * - 125;
+            var mid = ( α > 180 ) ? 1 : 0;
+            var anim = 'M 0 0 v -125 A 125 125 1 ' + mid + ' 1 ' +  x  + ' ' +  y  + ' z';
+         
+            timer.setAttribute( 'd', anim );
+          
+            setTimeout(function() {
+                $(timer).drawTimer(speed, α);
+            }, speed); // Redraw
+        }
     }
 });

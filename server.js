@@ -81,12 +81,15 @@ serialPort.on("open", function () {
 		}  
 	});
 
-  	// client requests ejection
-	io.sockets.on('MACHINE__eject', function (data) {
-		// eject machine here
-		serialPort.write("e\n", function(err, results) {
-			console.log('SERIAL error ' + err);
-			console.log('SERIAL results ' + results);
+	io.on('connection', function (socket) {
+	  	// client requests ejection
+		socket.on('MACHINE__eject', function (data) {
+			// eject machine here
+			console.log('eject NOW');
+			serialPort.write("e", function(err, results) {
+				console.log('SERIAL error ' + err);
+				console.log('SERIAL results ' + results);
+			});
 		});
 	});
 });
