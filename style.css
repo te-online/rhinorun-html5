@@ -38,10 +38,20 @@ video {
 }
 .wintext {
 	position: absolute;
-	left: 50vw;
-	top: 50vh;
-	background-color: rgb(255, 255, 255);
+	left: calc(33vw - 1rem);
+	top: 20vh;
+	width: calc(33vw - 1rem);
+	font-family: "Sofia Pro";
+	font-size: 2rem;
+	text-align: center;
+	color: rgb(248, 172, 62);
+	background-color: rgba(255, 255, 255, 0.8);
+	padding: 2rem;
+	border-radius: 2rem;
 	z-index: 9999;
+}
+.uppercase {
+	text-transform: uppercase;
 }
 .optionIcon {
 	width: 32%;

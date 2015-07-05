@@ -37,6 +37,9 @@ $(document).ready( function() {
     $('video[data-type=ext_teaser]')[0].loop = true;
     $('audio[data-type=game_background]')[0].loop = true;
 
+    // Set volume of game audio
+    $('audio[data-type=game_background]')[0].volume = 0.5;
+
     // preload videos and stop all
     preload();
 
@@ -67,21 +70,7 @@ $(document).ready( function() {
         }
         console.log('KINECT is now '+data.state);
         // Wenn kinect changes
-        //  wenn user == true und ext_teaser !playing
-        if(data.state && $('video[data-type=ext_teaser]').vid_numPlaying() == 0) {
-            //      fade teaser aus und ext_teaser ein
-            $('video[data-type=teaser]').fadeOut(function() {
-                $(this).vid_stop();
-            });
-            $('video[data-type=ext_teaser]').vid_play().fadeIn();
-        } else if(!data.state && $('video[data-type=teaser]').vid_numPlaying() == 0) {
-             //  wenn user == false and teaser !playing
-             //  fade teaser ein und ext_teaser aus
-            $('video[data-type=ext_teaser]').fadeOut(function() {
-                $(this).vid_stop();
-            });
-            $('video[data-type=teaser]').vid_play().fadeIn();
-        } 
+        kinectChange(data);
     });
 
     socket.on('MACHINE__hasCoin', function (data) {
@@ -117,6 +106,24 @@ $(document).ready( function() {
             wrongCredit += data.coin;
             $('.wrongCredit').text(parseMoney(wrongCredit));
         }  
+    }
+
+    function kinectChange(data) {
+        //  wenn user == true und ext_teaser !playing
+        if(data.state && $('video[data-type=ext_teaser]').vid_numPlaying() == 0) {
+            //  fade teaser aus und ext_teaser ein
+            $('video[data-type=teaser]').fadeOut(function() {
+                $(this).vid_stop();
+            });
+            $('video[data-type=ext_teaser]').vid_play().fadeIn();
+        } else if(!data.state && $('video[data-type=teaser]').vid_numPlaying() == 0) {
+             //  wenn user == false and teaser !playing
+             //  fade teaser ein und ext_teaser aus
+            $('video[data-type=ext_teaser]').fadeOut(function() {
+                $(this).vid_stop();
+            });
+            $('video[data-type=teaser]').vid_play().fadeIn();
+        } 
     }
 
 
@@ -162,6 +169,9 @@ $(document).ready( function() {
             // Zeige gameover mit id = 1 (Win Gameover)
             $('video[data-type=gameover][data-id=1]').show().vid_play();
             // Zeige hier ggf. noch einen Text mit dem currentCredit
+            $('p[data-type=winslogan]').hide();
+            var random = Math.floor(Math.random() * 3) + 1;
+            $('p[data-type=winslogan][data-id='+random+']').show();
             $('.wintext').fadeIn();
             // Gib hier das Geld zurück
             socket.emit('MACHINE__eject', { eject: true });
@@ -196,9 +206,9 @@ $(document).ready( function() {
      */
     function parseMoney(cents) {
         cents = cents/100;
-        cents = ""+cents;
+        cents = cents+"0";
         cents = cents.replace(".", ",");
-        return cents + " €";
+        return cents + " &euro;";
     }
 
     /**
@@ -219,6 +229,11 @@ $(document).ready( function() {
             hasCoin({coin: 50});
         } else if(event.keyCode == 39) {
             hasCoin({coin: 100});
+        }
+        if(event.keyCode == 38) {
+            kinectChange({state: true});
+        } else if(event.keyCode == 40) {
+            kinectChange({state: false});
         }
     });
     
