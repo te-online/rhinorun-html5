@@ -206,9 +206,9 @@ $(document).ready( function() {
      */
     function parseMoney(cents) {
         cents = cents/100;
-        cents = cents+"0";
         cents = cents.replace(".", ",");
-        return cents + " &euro;";
+        cents = cents.replace(",5", ",50");
+        return cents + " €";
     }
 
     /**
