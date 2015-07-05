@@ -30,12 +30,22 @@ $(document).ready( function() {
     });
     // Hide all videos
     $('video').hide();
-    // Play the first one
-    $('video[data-type=teaser]').fadeIn().vid_play();
+    $('audio').hide();
 
     // Looping teaser and extended teaser
     $('video[data-type=teaser]')[0].loop = true;
     $('video[data-type=ext_teaser]')[0].loop = true;
+    $('audio[data-type=game_background]')[0].loop = true;
+
+    // preload videos and stop all
+    preload();
+
+    // Play the first one
+    // but wait for preloading to finish
+    setTimeout(function() {
+        $('video[data-type=teaser]').fadeIn().vid_play();
+    }, 500);
+    
 
     // Don't display overlays
     $('.optionIcons').hide();
@@ -94,6 +104,7 @@ $(document).ready( function() {
             $('video[data-type=teaser]').fadeOut(function() {
                 $(this).vid_stop();
                 $('video[data-type=walking][data-id='+currentLevel+']').fadeIn().vid_play();
+                $('audio[data-type=game_background]').vid_play();
                 currentDecision = 0;
             });
         } else if($('video[data-type=ext_teaser]').vid_numPlaying() > 0) {
@@ -127,6 +138,7 @@ $(document).ready( function() {
             $(this).vid_stop().fadeOut( function() {
                 // Zeige gameover mit id = 0 (Standard Gameover)
                 console.log('gameover 0');
+                $('audio[data-type=game_background]').vid_stop();
                 $('video[data-type=gameover][data-id=0]').fadeIn().vid_play();
             });
         }
@@ -146,6 +158,7 @@ $(document).ready( function() {
         } else {
             // Verstecke option
             $(this).vid_stop().hide();
+            $('audio[data-type=game_background]').vid_stop();
             // Zeige gameover mit id = 1 (Win Gameover)
             $('video[data-type=gameover][data-id=1]').show().vid_play();
             // Zeige hier ggf. noch einen Text mit dem currentCredit
@@ -189,8 +202,14 @@ $(document).ready( function() {
     }
 
     /**
-     * Aimate optionTimer as a clock
+     * Preload videos
      */
+    function preload() {
+        $('video').vid_play();
+        setTimeout(function() {
+            $('video').vid_stop();
+        }, 250);        
+    }
 
     /**
      * Debugging
