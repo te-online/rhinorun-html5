@@ -235,6 +235,9 @@ $(document).ready( function() {
         } else if(event.keyCode == 40) {
             kinectChange({state: false});
         }
+        if(event.keyCode == 69) {
+            socket.emit('MACHINE__eject', { eject: true });
+        }
     });
     
 });
