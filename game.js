@@ -20,6 +20,8 @@ $(document).ready( function() {
     var wrongCredit = 0;
     // The current decision of the user
     var currentDecision = 0;
+    // Global game volume
+    var game_volume = 0.5;
 
     /**
      * Initial Video configuration
@@ -38,7 +40,7 @@ $(document).ready( function() {
     $('audio[data-type=game_background]')[0].loop = true;
 
     // Set volume of game audio
-    $('audio[data-type=game_background]')[0].volume = 0.5;
+    $('audio[data-type=game_background]')[0].volume = game_volume;
 
     // preload videos and stop all
     preload();
@@ -53,7 +55,7 @@ $(document).ready( function() {
     // Don't display overlays
     $('.optionIcons').hide();
     // $('.optionIcons').eq(0).show();
-    $('.wintext').hide();
+    // $('.wintext').hide();
 
     /**
      * SOCKET CONNECTION
@@ -238,6 +240,14 @@ $(document).ready( function() {
         if(event.keyCode == 69) {
             socket.emit('MACHINE__eject', { eject: true });
         }
+        if(event.keyCode == 77) {
+            $('video').vid_mute();
+            $('audio')[0].volume = 0;
+        }
+        if(event.keyCode == 85) {
+            $('video').vid_unmute();
+            $('audio')[0].volume = game_volume;
+        }
     });
     
 });
@@ -295,6 +305,16 @@ jQuery.fn.extend({
             }
         });
         return numPlaying;
+    },
+    vid_mute: function() {
+        return this.each(function() {
+          this.volume = 0;
+        });
+    },
+    vid_unmute: function() {
+        return this.each(function() {
+          this.volume = 1;
+        });
     },
     startTimer: function(milliseconds) {
         var t = milliseconds/360;
