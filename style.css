@@ -33,21 +33,17 @@ video {
 	        transform: scale(0.4);
 }
 .optionTimer {
-	/*fill: rgba(162, 161, 161, 0.5);*/
 	fill: rgba(248, 172, 62, 0.8);
 }
 .wintext {
 	position: absolute;
-	left: calc(33vw - 1rem);
-	top: 20vh;
-	width: calc(33vw - 1rem);
+	left: 25vw;
+	top: 71vh;
+	width: 50vw;
 	font-family: "Sofia Pro";
-	font-size: 2rem;
+	font-size: 2.5rem;
 	text-align: center;
-	color: rgb(248, 172, 62);
-	background-color: rgba(255, 255, 255, 0.8);
-	padding: 2rem;
-	border-radius: 2rem;
+	color: rgb(255, 255, 255);
 	z-index: 9999;
 }
 .uppercase {

@@ -5,9 +5,13 @@ $(document).ready( function() {
     // The number of levels available
     var numLevels = 5;
     // The time before end of walking scene when options appear to user (in ms)
-    var decisionTime = 10000;
+    var decisionTime = 5000;
     // The coins available (SYNTAX?)
     var availableCoins =  { '50': '1', '100': '2' };
+    // Global game volume
+    var game_volume = 0.25;
+    // You won timeout
+    var won_timeout = 12000;
 
     /**
      * PROGRAMM VARS
@@ -20,8 +24,6 @@ $(document).ready( function() {
     var wrongCredit = 0;
     // The current decision of the user
     var currentDecision = 0;
-    // Global game volume
-    var game_volume = 0.5;
 
     /**
      * Initial Video configuration
@@ -55,7 +57,7 @@ $(document).ready( function() {
     // Don't display overlays
     $('.optionIcons').hide();
     // $('.optionIcons').eq(0).show();
-    // $('.wintext').hide();
+    $('.wintext').hide();
 
     /**
      * SOCKET CONNECTION
@@ -170,13 +172,13 @@ $(document).ready( function() {
             $('audio[data-type=game_background]').vid_stop();
             // Zeige gameover mit id = 1 (Win Gameover)
             $('video[data-type=gameover][data-id=1]').show().vid_play();
-            // Zeige hier ggf. noch einen Text mit dem currentCredit
-            $('p[data-type=winslogan]').hide();
-            var random = Math.floor(Math.random() * 3) + 1;
-            $('p[data-type=winslogan][data-id='+random+']').show();
-            $('.wintext').fadeIn();
-            // Gib hier das Geld zurück
-            socket.emit('MACHINE__eject', { eject: true });
+            setTimeout(function() {
+                // Zeige hier ggf. noch einen Text mit dem currentCredit
+                $('.wintext').fadeIn();
+                // Gib hier das Geld zurück
+                socket.emit('MACHINE__eject', { eject: true });
+            }, won_timeout);
+            
         }
     });
 
@@ -208,6 +210,7 @@ $(document).ready( function() {
      */
     function parseMoney(cents) {
         cents = cents/100;
+        cents = cents+"";
         cents = cents.replace(".", ",");
         cents = cents.replace(",5", ",50");
         return cents + " €";
