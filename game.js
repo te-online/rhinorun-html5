@@ -104,6 +104,8 @@ $(document).ready( function() {
             $('video[data-type=ext_teaser]').fadeOut(function() {
                 $(this).vid_stop();
                 $('video[data-type=walking][data-id='+currentLevel+']').fadeIn().vid_play();
+                $('audio[data-type=game_background]').vid_play();
+                currentDecision = 0;
             });
         } else {
             // sonst addiere zu wrong money 
