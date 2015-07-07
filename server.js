@@ -20,13 +20,12 @@ var globalCredit = localStorage.getItem('globalCredit') || 0;
 // The current state that says whether a user is in front of the machine or not
 var userInFront = false;
 // The Serial Port name 1411 or 1421
-var serialPortName = "cu.usbmodem1411";
+var serialPortName = "cu.usbmodem14241";
 
 /**
  * Starting express app
  */
 var app = express();
-
 /**
  * Starting server
  */
